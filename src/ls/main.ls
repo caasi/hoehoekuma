@@ -72,7 +72,7 @@ loader.addEventListener \onComplete ->
                   new PIXI.Texture sprite-kuma, {x: 24 y: 32} <<< dim
                   new PIXI.Texture sprite-kuma, {x: 48 y: 32} <<< dim
                   new PIXI.Texture sprite-kuma, {x: 24 y: 32} <<< dim
-  hoe = new PIXI.MovieClip [new PIXI.Texture sprite-kuma, {x: 96  y: 0} <<< dim]
+  hoe = new PIXI.MovieClip [new PIXI.Texture sprite-kuma, {x: 72  y: 0} <<< dim]
   mc-kuma
     ..hoe =
       down:   hoe

@@ -234,7 +234,7 @@
       }
     };
     hoe = new PIXI.MovieClip([new PIXI.Texture(spriteKuma, import$({
-      x: 96,
+      x: 72,
       y: 0
     }, dim))]);
     y$ = mcKuma;
