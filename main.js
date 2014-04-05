@@ -135,7 +135,7 @@
   PIXI.scaleModes.DEFAULT = PIXI.scaleModes.NEARST;
   loader = new PIXI.AssetLoader([config.path.image + "char1.png"]);
   loader.addEventListener('onComplete', function(){
-    var stage, dim, setting, x$, gameStage, spriteKuma, kuma, hoe, renderer, animate;
+    var stage, dim, setting, x$, gameStage, spriteKuma, mcKuma, hoe, y$, z$, z1$, Kuma, kuma, renderer, z2$, animate;
     stage = new PIXI.Stage(0x000000);
     dim = dimension();
     setting = computePosScale(dim);
@@ -151,7 +151,7 @@
       width: 24,
       height: 32
     };
-    kuma = {
+    mcKuma = {
       stand: {
         down: new PIXI.MovieClip([new PIXI.Texture(spriteKuma, import$({
           x: 24,
@@ -237,20 +237,80 @@
       x: 96,
       y: 0
     }, dim))]);
-    kuma.hoe = {
+    y$ = mcKuma;
+    y$.hoe = {
       down: hoe,
       up: hoe,
       left: hoe,
       right: hoe
     };
-    kuma.stand.left.scale.x = -1;
-    kuma.walk.left.scale.x = -1;
-    kuma.walk.down.play();
-    gameStage.addChild(kuma.walk.down);
+    z$ = y$.stand.left;
+    z$.x = dim.width;
+    z$.scale.x = -1;
+    z1$ = y$.walk.left;
+    z1$.x = dim.width;
+    z1$.scale.x = -1;
+    Kuma = (function(){
+      Kuma.displayName = 'Kuma';
+      var prototype = Kuma.prototype, constructor = Kuma;
+      function Kuma(movieclips){
+        this.movieclips = movieclips;
+        this.sprite = new PIXI.DisplayObjectContainer;
+        this.stance = 'stand';
+        this.facing = 'down';
+        this.currentClip = this.movieclips[this.stance][this.facing];
+        this.sprite.addChild(this.currentClip);
+        this.status = {
+          stance: this.stance,
+          facing: this.facing
+        };
+        this.speed = {
+          left: {
+            x: -4,
+            y: 0
+          },
+          right: {
+            x: 4,
+            y: 0
+          },
+          up: {
+            x: 0,
+            y: -2
+          },
+          down: {
+            x: 0,
+            y: 2
+          }
+        };
+      }
+      prototype.update = function(){
+        var x$, y$;
+        if (this.status.stance !== this.stance || this.status.facing !== this.facing) {
+          this.currentClip.stop();
+          this.sprite.removeChild(this.currentClip);
+          this.currentClip = this.movieclips[this.stance][this.facing];
+          this.currentClip.play();
+          this.sprite.addChild(this.currentClip);
+          x$ = this.status;
+          x$.stance = this.stance;
+          x$.facing = this.facing;
+        }
+        if (this.status.stance === 'walk') {
+          y$ = this.sprite;
+          y$.x += this.speed[this.status.facing].x;
+          y$.y += this.speed[this.status.facing].y;
+          return y$;
+        }
+      };
+      return Kuma;
+    }());
+    kuma = new Kuma(mcKuma);
+    gameStage.addChild(kuma.sprite);
     renderer = PIXI.autoDetectRenderer($win.width(), $win.height());
     renderer.view.className = 'rendererView';
     $('body').append(renderer.view);
-    $(window).resize(function(){
+    z2$ = $win;
+    z2$.resize(function(){
       var dim, setting, x$;
       dim = dimension();
       setting = computePosScale(dim);
@@ -259,7 +319,34 @@
       x$.position = setting.offset;
       x$.scale = setting.scale;
     });
+    z2$.keydown(function(e){
+      var facing;
+      facing = {
+        '37': 'left',
+        '38': 'up',
+        '39': 'right',
+        '40': 'down'
+      };
+      switch (e.which) {
+      case 37:
+      case 38:
+      case 39:
+      case 40:
+        kuma.stance = 'walk';
+        kuma.facing = facing[e.which];
+      }
+    });
+    z2$.keyup(function(e){
+      switch (e.which) {
+      case 37:
+      case 38:
+      case 39:
+      case 40:
+        kuma.stance = 'stand';
+      }
+    });
     animate = function(){
+      kuma.update();
       requestAnimationFrame(animate);
       renderer.render(stage);
     };

@@ -45,7 +45,7 @@ loader.addEventListener \onComplete ->
   # sprites
   sprite-kuma = PIXI.BaseTexture.fromImage "#{config.path.image}char1.png"
   dim = width: 24 height: 32
-  kuma =
+  mc-kuma =
     stand:
       down:   new PIXI.MovieClip [new PIXI.Texture sprite-kuma, {x: 24  y: 0 } <<< dim]
       up:     new PIXI.MovieClip [new PIXI.Texture sprite-kuma, {x: 24  y: 64} <<< dim]
@@ -73,30 +73,88 @@ loader.addEventListener \onComplete ->
                   new PIXI.Texture sprite-kuma, {x: 48 y: 32} <<< dim
                   new PIXI.Texture sprite-kuma, {x: 24 y: 32} <<< dim
   hoe = new PIXI.MovieClip [new PIXI.Texture sprite-kuma, {x: 96  y: 0} <<< dim]
-  kuma.hoe =
-    down:   hoe
-    up:     hoe
-    left:   hoe
-    right:  hoe
-  kuma.stand.left.scale.x = -1
-  kuma.walk.left.scale.x = -1
-  kuma.walk.down.play!
-  game-stage.addChild kuma.walk.down
+  mc-kuma
+    ..hoe =
+      down:   hoe
+      up:     hoe
+      left:   hoe
+      right:  hoe
+    ..stand.left
+      ..x = dim.width
+      ..scale.x = -1
+    ..walk.left
+      ..x = dim.width
+      ..scale.x = -1
+  class Kuma
+    (@movieclips) ->
+      @sprite = new PIXI.DisplayObjectContainer
+      @stance = \stand
+      @facing = \down
+      @current-clip = @movieclips[@stance][@facing]
+      @sprite.addChild @current-clip
+      @status =
+        stance: @stance
+        facing: @facing
+      @speed =
+        left:
+          x: -4
+          y: 0
+        right:
+          x: 4
+          y: 0
+        up:
+          x: 0
+          y: -2
+        down:
+          x: 0
+          y: 2
+    update: ->
+      if @status.stance isnt @stance or @status.facing isnt @facing
+        @current-clip.stop!
+        @sprite.removeChild @current-clip
+        @current-clip = @movieclips[@stance][@facing]
+        @current-clip.play!
+        @sprite.addChild @current-clip
+        @status
+          ..stance = @stance
+          ..facing = @facing
+      if @status.stance is \walk
+        @sprite
+          ..x += @speed[@status.facing].x
+          ..y += @speed[@status.facing].y
+  kuma = new Kuma mc-kuma
+  game-stage.addChild kuma.sprite
 
   # resize and render
   renderer = PIXI.autoDetectRenderer $win.width!, $win.height!
   renderer.view.className = \rendererView
   $(\body).append renderer.view
 
-  $(window).resize !->
-    dim = dimension!
-    setting = compute-pos-scale dim
-    renderer.resize dim.w, dim.h
-    game-stage
-      ..position = setting.offset
-      ..scale    = setting.scale
+  $win
+    ..resize !->
+      dim = dimension!
+      setting = compute-pos-scale dim
+      renderer.resize dim.w, dim.h
+      game-stage
+        ..position = setting.offset
+        ..scale    = setting.scale
+    # a lame solution
+    ..keydown (e) !->
+      facing =
+        '37': \left
+        '38': \up
+        '39': \right
+        '40': \down
+      switch e.which
+      | 37, 38, 39, 40 =>
+        kuma.stance = \walk
+        kuma.facing = facing[e.which]
+    ..keyup (e) !->
+      switch e.which
+      | 37, 38, 39, 40 => kuma.stance = \stand
 
   animate = !->
+    kuma.update!
     requestAnimationFrame animate
     renderer.render stage
   requestAnimationFrame animate
