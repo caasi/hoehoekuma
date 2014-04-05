@@ -1,0 +1,29 @@
+{
+  "name": "hoehoekuma",
+  "version": "0.0.1",
+  "description": "A game prototype for Sunflower Movement in Taiwan.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "gulp --require LiveScript",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "game",
+    "SunflowerMovement",
+    "CongressOccupied"
+  ],
+  "author": "caasi Huang",
+  "license": "ISC",
+  "devDependencies": {
+    "LiveScript": "^1.2.0",
+    "gulp": "^3.5.5",
+    "gulp-util": "^2.2.14",
+    "gulp-concat": "^2.1.7",
+    "gulp-livescript": "^0.2.0",
+    "gulp-jade": "^0.4.2",
+    "gulp-livereload": "^1.2.0",
+    "event-stream": "^3.1.0",
+    "node-static": "^0.7.3",
+    "tiny-lr": "0.0.5"
+  }
+}
