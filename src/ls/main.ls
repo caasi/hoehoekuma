@@ -26,11 +26,11 @@ PIXI.scaleModes.DEFAULT = PIXI.scaleModes.NEARST
 
 # preload images
 loader = new PIXI.AssetLoader [
-  "#{config.path.image}/template_gerbera.png"
-  "#{config.path.image}/char1.png"
-  "#{config.path.image}/char2.png"
-  "#{config.path.image}/char3.png"
-  "#{config.path.image}/char4.png"
+  "#{config.path.image}/gerbera_sprites.png"
+  "#{config.path.image}/char1_sprites.png"
+  "#{config.path.image}/char2_sprites.png"
+  "#{config.path.image}/char3_sprites.png"
+  "#{config.path.image}/char4_sprites.png"
 ]
 
 loader.addEventListener \onComplete ->
@@ -48,10 +48,10 @@ loader.addEventListener \onComplete ->
 
   # sprites
   Kuma.sprites
-    ..push "#{config.path.image}/char1.png"
-    ..push "#{config.path.image}/char2.png"
-    ..push "#{config.path.image}/char3.png"
-    ..push "#{config.path.image}/char4.png"
+    ..push "#{config.path.image}/char1_sprites.png"
+    ..push "#{config.path.image}/char2_sprites.png"
+    ..push "#{config.path.image}/char3_sprites.png"
+    ..push "#{config.path.image}/char4_sprites.png"
   kuma = Kuma.create-random!
   game-stage.addChild kuma.sprite
 

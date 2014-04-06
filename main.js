@@ -104,112 +104,49 @@
     Kuma.displayName = 'Kuma';
     var prototype = Kuma.prototype, constructor = Kuma;
     constructor.createKumaclips = function(path){
-      var texture, dim, clips, hoe, x$, y$, z$;
+      var texture, dim, bases, clips, hoe, key, base, mcs, res$, i$, i;
       texture = PIXI.BaseTexture.fromImage(path);
       dim = {
         width: 24,
         height: 32
       };
+      bases = {
+        down: 0,
+        right: 96,
+        up: 192,
+        left: 288
+      };
       clips = {
-        stand: {
-          down: new PIXI.MovieClip([new PIXI.Texture(texture, import$({
-            x: 24,
-            y: 0
-          }, dim))]),
-          up: new PIXI.MovieClip([new PIXI.Texture(texture, import$({
-            x: 24,
-            y: 64
-          }, dim))]),
-          left: new PIXI.MovieClip([new PIXI.Texture(texture, import$({
-            x: 24,
-            y: 32
-          }, dim))]),
-          right: new PIXI.MovieClip([new PIXI.Texture(texture, import$({
-            x: 24,
-            y: 32
-          }, dim))])
-        },
-        walk: {
-          down: new PIXI.MovieClip([
-            new PIXI.Texture(texture, import$({
-              x: 0,
-              y: 0
-            }, dim)), new PIXI.Texture(texture, import$({
-              x: 24,
-              y: 0
-            }, dim)), new PIXI.Texture(texture, import$({
-              x: 48,
-              y: 0
-            }, dim)), new PIXI.Texture(texture, import$({
-              x: 24,
-              y: 0
-            }, dim))
-          ]),
-          up: new PIXI.MovieClip([
-            new PIXI.Texture(texture, import$({
-              x: 0,
-              y: 64
-            }, dim)), new PIXI.Texture(texture, import$({
-              x: 24,
-              y: 64
-            }, dim)), new PIXI.Texture(texture, import$({
-              x: 48,
-              y: 64
-            }, dim)), new PIXI.Texture(texture, import$({
-              x: 24,
-              y: 64
-            }, dim))
-          ]),
-          left: new PIXI.MovieClip([
-            new PIXI.Texture(texture, import$({
-              x: 0,
-              y: 32
-            }, dim)), new PIXI.Texture(texture, import$({
-              x: 24,
-              y: 32
-            }, dim)), new PIXI.Texture(texture, import$({
-              x: 48,
-              y: 32
-            }, dim)), new PIXI.Texture(texture, import$({
-              x: 24,
-              y: 32
-            }, dim))
-          ]),
-          right: new PIXI.MovieClip([
-            new PIXI.Texture(texture, import$({
-              x: 0,
-              y: 32
-            }, dim)), new PIXI.Texture(texture, import$({
-              x: 24,
-              y: 32
-            }, dim)), new PIXI.Texture(texture, import$({
-              x: 48,
-              y: 32
-            }, dim)), new PIXI.Texture(texture, import$({
-              x: 24,
-              y: 32
-            }, dim))
-          ])
-        }
+        stand: {},
+        walk: {},
+        hoe: {}
       };
       hoe = new PIXI.MovieClip([new PIXI.Texture(texture, import$({
-        x: 72,
+        x: 384,
         y: 0
       }, dim))]);
-      x$ = clips;
-      x$.hoe = {
-        down: hoe,
-        up: hoe,
-        left: hoe,
-        right: hoe
-      };
-      y$ = x$.stand.left;
-      y$.x = dim.width;
-      y$.scale.x = -1;
-      z$ = x$.walk.left;
-      z$.x = dim.width;
-      z$.scale.x = -1;
-      return x$;
+      hoe.animationSpeed = 0.5;
+      for (key in bases) {
+        base = bases[key];
+        clips.stand[key] = new PIXI.MovieClip([new PIXI.Texture(texture, import$({
+          x: base + 24,
+          y: 0
+        }, dim))]);
+        clips.stand[key].animationSpeed = 0.5;
+        res$ = [];
+        for (i$ = 0; i$ < 4; ++i$) {
+          i = i$;
+          res$.push(new PIXI.Texture(texture, import$({
+            x: base + i * 24,
+            y: 0
+          }, dim)));
+        }
+        mcs = res$;
+        clips.walk[key] = new PIXI.MovieClip(mcs);
+        clips.walk[key].animationSpeed = 0.5;
+        clips.hoe[key] = hoe;
+      }
+      return clips;
     };
     constructor.sprites = [];
     constructor.createRandom = function(){
@@ -230,20 +167,20 @@
       };
       this.speed = {
         left: {
-          x: -4,
+          x: -2,
           y: 0
         },
         right: {
-          x: 4,
+          x: 2,
           y: 0
         },
         up: {
           x: 0,
-          y: -2
+          y: -1
         },
         down: {
           x: 0,
-          y: 2
+          y: 1
         }
       };
     }
@@ -301,7 +238,7 @@
     };
   };
   PIXI.scaleModes.DEFAULT = PIXI.scaleModes.NEARST;
-  loader = new PIXI.AssetLoader([config.path.image + "/template_gerbera.png", config.path.image + "/char1.png", config.path.image + "/char2.png", config.path.image + "/char3.png", config.path.image + "/char4.png"]);
+  loader = new PIXI.AssetLoader([config.path.image + "/gerbera_sprites.png", config.path.image + "/char1_sprites.png", config.path.image + "/char2_sprites.png", config.path.image + "/char3_sprites.png", config.path.image + "/char4_sprites.png"]);
   loader.addEventListener('onComplete', function(){
     var stage, dim, setting, x$, gameStage, y$, kuma, renderer, z$, animate;
     stage = new PIXI.Stage(0x000000);
@@ -315,10 +252,10 @@
     x$.scale = setting.scale;
     stage.addChild(gameStage);
     y$ = Kuma.sprites;
-    y$.push(config.path.image + "/char1.png");
-    y$.push(config.path.image + "/char2.png");
-    y$.push(config.path.image + "/char3.png");
-    y$.push(config.path.image + "/char4.png");
+    y$.push(config.path.image + "/char1_sprites.png");
+    y$.push(config.path.image + "/char2_sprites.png");
+    y$.push(config.path.image + "/char3_sprites.png");
+    y$.push(config.path.image + "/char4_sprites.png");
     kuma = Kuma.createRandom();
     gameStage.addChild(kuma.sprite);
     renderer = PIXI.autoDetectRenderer($win.width(), $win.height());
