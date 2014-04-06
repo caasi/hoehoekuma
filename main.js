@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  **/
 (function(){
-  var script, scriptParser, current, i, branch, talk, x$, y$, ref$, $win, config, dimension, computePosScale, loader;
+  var script, scriptParser, current, i, branch, talk, x$, y$, ref$, Kuma, $win, config, dimension, computePosScale, loader;
   script = {
     caasi: [
       {
@@ -100,12 +100,180 @@
     },
     talk: talk
   });
+  Kuma = (function(){
+    Kuma.displayName = 'Kuma';
+    var prototype = Kuma.prototype, constructor = Kuma;
+    constructor.createKumaclips = function(path){
+      var texture, dim, clips, hoe, x$, y$, z$;
+      texture = PIXI.BaseTexture.fromImage(path);
+      dim = {
+        width: 24,
+        height: 32
+      };
+      clips = {
+        stand: {
+          down: new PIXI.MovieClip([new PIXI.Texture(texture, import$({
+            x: 24,
+            y: 0
+          }, dim))]),
+          up: new PIXI.MovieClip([new PIXI.Texture(texture, import$({
+            x: 24,
+            y: 64
+          }, dim))]),
+          left: new PIXI.MovieClip([new PIXI.Texture(texture, import$({
+            x: 24,
+            y: 32
+          }, dim))]),
+          right: new PIXI.MovieClip([new PIXI.Texture(texture, import$({
+            x: 24,
+            y: 32
+          }, dim))])
+        },
+        walk: {
+          down: new PIXI.MovieClip([
+            new PIXI.Texture(texture, import$({
+              x: 0,
+              y: 0
+            }, dim)), new PIXI.Texture(texture, import$({
+              x: 24,
+              y: 0
+            }, dim)), new PIXI.Texture(texture, import$({
+              x: 48,
+              y: 0
+            }, dim)), new PIXI.Texture(texture, import$({
+              x: 24,
+              y: 0
+            }, dim))
+          ]),
+          up: new PIXI.MovieClip([
+            new PIXI.Texture(texture, import$({
+              x: 0,
+              y: 64
+            }, dim)), new PIXI.Texture(texture, import$({
+              x: 24,
+              y: 64
+            }, dim)), new PIXI.Texture(texture, import$({
+              x: 48,
+              y: 64
+            }, dim)), new PIXI.Texture(texture, import$({
+              x: 24,
+              y: 64
+            }, dim))
+          ]),
+          left: new PIXI.MovieClip([
+            new PIXI.Texture(texture, import$({
+              x: 0,
+              y: 32
+            }, dim)), new PIXI.Texture(texture, import$({
+              x: 24,
+              y: 32
+            }, dim)), new PIXI.Texture(texture, import$({
+              x: 48,
+              y: 32
+            }, dim)), new PIXI.Texture(texture, import$({
+              x: 24,
+              y: 32
+            }, dim))
+          ]),
+          right: new PIXI.MovieClip([
+            new PIXI.Texture(texture, import$({
+              x: 0,
+              y: 32
+            }, dim)), new PIXI.Texture(texture, import$({
+              x: 24,
+              y: 32
+            }, dim)), new PIXI.Texture(texture, import$({
+              x: 48,
+              y: 32
+            }, dim)), new PIXI.Texture(texture, import$({
+              x: 24,
+              y: 32
+            }, dim))
+          ])
+        }
+      };
+      hoe = new PIXI.MovieClip([new PIXI.Texture(texture, import$({
+        x: 72,
+        y: 0
+      }, dim))]);
+      x$ = clips;
+      x$.hoe = {
+        down: hoe,
+        up: hoe,
+        left: hoe,
+        right: hoe
+      };
+      y$ = x$.stand.left;
+      y$.x = dim.width;
+      y$.scale.x = -1;
+      z$ = x$.walk.left;
+      z$.x = dim.width;
+      z$.scale.x = -1;
+      return x$;
+    };
+    constructor.sprites = [];
+    constructor.createRandom = function(){
+      var spritesheet, ref$;
+      spritesheet = (ref$ = constructor.sprites)[~~(Math.random() * ref$.length)];
+      return new Kuma(Kuma.createKumaclips(spritesheet));
+    };
+    function Kuma(movieclips){
+      this.movieclips = movieclips;
+      this.sprite = new PIXI.DisplayObjectContainer;
+      this.stance = 'stand';
+      this.facing = 'down';
+      this.currentClip = this.movieclips[this.stance][this.facing];
+      this.sprite.addChild(this.currentClip);
+      this.status = {
+        stance: this.stance,
+        facing: this.facing
+      };
+      this.speed = {
+        left: {
+          x: -4,
+          y: 0
+        },
+        right: {
+          x: 4,
+          y: 0
+        },
+        up: {
+          x: 0,
+          y: -2
+        },
+        down: {
+          x: 0,
+          y: 2
+        }
+      };
+    }
+    prototype.update = function(){
+      var x$, y$;
+      if (this.status.stance !== this.stance || this.status.facing !== this.facing) {
+        this.currentClip.stop();
+        this.sprite.removeChild(this.currentClip);
+        this.currentClip = this.movieclips[this.stance][this.facing];
+        this.currentClip.play();
+        this.sprite.addChild(this.currentClip);
+        x$ = this.status;
+        x$.stance = this.stance;
+        x$.facing = this.facing;
+      }
+      if (this.status.stance === 'walk') {
+        y$ = this.sprite;
+        y$.x += this.speed[this.status.facing].x;
+        y$.y += this.speed[this.status.facing].y;
+        return y$;
+      }
+    };
+    return Kuma;
+  }());
   $win = $(window);
   config = {
     width: 160,
     height: 120,
     path: {
-      image: './img/'
+      image: './img'
     }
   };
   dimension = function(){
@@ -133,9 +301,9 @@
     };
   };
   PIXI.scaleModes.DEFAULT = PIXI.scaleModes.NEARST;
-  loader = new PIXI.AssetLoader([config.path.image + "char1.png"]);
+  loader = new PIXI.AssetLoader([config.path.image + "/template_gerbera.png", config.path.image + "/char1.png", config.path.image + "/char2.png", config.path.image + "/char3.png", config.path.image + "/char4.png"]);
   loader.addEventListener('onComplete', function(){
-    var stage, dim, setting, x$, gameStage, spriteKuma, mcKuma, hoe, y$, z$, z1$, Kuma, kuma, renderer, z2$, animate;
+    var stage, dim, setting, x$, gameStage, y$, kuma, renderer, z$, animate;
     stage = new PIXI.Stage(0x000000);
     dim = dimension();
     setting = computePosScale(dim);
@@ -146,171 +314,18 @@
     x$.position = setting.offset;
     x$.scale = setting.scale;
     stage.addChild(gameStage);
-    spriteKuma = PIXI.BaseTexture.fromImage(config.path.image + "char1.png");
-    dim = {
-      width: 24,
-      height: 32
-    };
-    mcKuma = {
-      stand: {
-        down: new PIXI.MovieClip([new PIXI.Texture(spriteKuma, import$({
-          x: 24,
-          y: 0
-        }, dim))]),
-        up: new PIXI.MovieClip([new PIXI.Texture(spriteKuma, import$({
-          x: 24,
-          y: 64
-        }, dim))]),
-        left: new PIXI.MovieClip([new PIXI.Texture(spriteKuma, import$({
-          x: 24,
-          y: 32
-        }, dim))]),
-        right: new PIXI.MovieClip([new PIXI.Texture(spriteKuma, import$({
-          x: 24,
-          y: 32
-        }, dim))])
-      },
-      walk: {
-        down: new PIXI.MovieClip([
-          new PIXI.Texture(spriteKuma, import$({
-            x: 0,
-            y: 0
-          }, dim)), new PIXI.Texture(spriteKuma, import$({
-            x: 24,
-            y: 0
-          }, dim)), new PIXI.Texture(spriteKuma, import$({
-            x: 48,
-            y: 0
-          }, dim)), new PIXI.Texture(spriteKuma, import$({
-            x: 24,
-            y: 0
-          }, dim))
-        ]),
-        up: new PIXI.MovieClip([
-          new PIXI.Texture(spriteKuma, import$({
-            x: 0,
-            y: 64
-          }, dim)), new PIXI.Texture(spriteKuma, import$({
-            x: 24,
-            y: 64
-          }, dim)), new PIXI.Texture(spriteKuma, import$({
-            x: 48,
-            y: 64
-          }, dim)), new PIXI.Texture(spriteKuma, import$({
-            x: 24,
-            y: 64
-          }, dim))
-        ]),
-        left: new PIXI.MovieClip([
-          new PIXI.Texture(spriteKuma, import$({
-            x: 0,
-            y: 32
-          }, dim)), new PIXI.Texture(spriteKuma, import$({
-            x: 24,
-            y: 32
-          }, dim)), new PIXI.Texture(spriteKuma, import$({
-            x: 48,
-            y: 32
-          }, dim)), new PIXI.Texture(spriteKuma, import$({
-            x: 24,
-            y: 32
-          }, dim))
-        ]),
-        right: new PIXI.MovieClip([
-          new PIXI.Texture(spriteKuma, import$({
-            x: 0,
-            y: 32
-          }, dim)), new PIXI.Texture(spriteKuma, import$({
-            x: 24,
-            y: 32
-          }, dim)), new PIXI.Texture(spriteKuma, import$({
-            x: 48,
-            y: 32
-          }, dim)), new PIXI.Texture(spriteKuma, import$({
-            x: 24,
-            y: 32
-          }, dim))
-        ])
-      }
-    };
-    hoe = new PIXI.MovieClip([new PIXI.Texture(spriteKuma, import$({
-      x: 72,
-      y: 0
-    }, dim))]);
-    y$ = mcKuma;
-    y$.hoe = {
-      down: hoe,
-      up: hoe,
-      left: hoe,
-      right: hoe
-    };
-    z$ = y$.stand.left;
-    z$.x = dim.width;
-    z$.scale.x = -1;
-    z1$ = y$.walk.left;
-    z1$.x = dim.width;
-    z1$.scale.x = -1;
-    Kuma = (function(){
-      Kuma.displayName = 'Kuma';
-      var prototype = Kuma.prototype, constructor = Kuma;
-      function Kuma(movieclips){
-        this.movieclips = movieclips;
-        this.sprite = new PIXI.DisplayObjectContainer;
-        this.stance = 'stand';
-        this.facing = 'down';
-        this.currentClip = this.movieclips[this.stance][this.facing];
-        this.sprite.addChild(this.currentClip);
-        this.status = {
-          stance: this.stance,
-          facing: this.facing
-        };
-        this.speed = {
-          left: {
-            x: -4,
-            y: 0
-          },
-          right: {
-            x: 4,
-            y: 0
-          },
-          up: {
-            x: 0,
-            y: -2
-          },
-          down: {
-            x: 0,
-            y: 2
-          }
-        };
-      }
-      prototype.update = function(){
-        var x$, y$;
-        if (this.status.stance !== this.stance || this.status.facing !== this.facing) {
-          this.currentClip.stop();
-          this.sprite.removeChild(this.currentClip);
-          this.currentClip = this.movieclips[this.stance][this.facing];
-          this.currentClip.play();
-          this.sprite.addChild(this.currentClip);
-          x$ = this.status;
-          x$.stance = this.stance;
-          x$.facing = this.facing;
-        }
-        if (this.status.stance === 'walk') {
-          y$ = this.sprite;
-          y$.x += this.speed[this.status.facing].x;
-          y$.y += this.speed[this.status.facing].y;
-          return y$;
-        }
-      };
-      return Kuma;
-    }());
-    kuma = new Kuma(mcKuma);
+    y$ = Kuma.sprites;
+    y$.push(config.path.image + "/char1.png");
+    y$.push(config.path.image + "/char2.png");
+    y$.push(config.path.image + "/char3.png");
+    y$.push(config.path.image + "/char4.png");
+    kuma = Kuma.createRandom();
     gameStage.addChild(kuma.sprite);
     renderer = PIXI.autoDetectRenderer($win.width(), $win.height());
     renderer.view.className = 'rendererView';
     $('body').append(renderer.view);
-    z2$ = $win;
-    z2$.resize(function(){
+    z$ = $win;
+    z$.resize(function(){
       var dim, setting, x$;
       dim = dimension();
       setting = computePosScale(dim);
@@ -319,7 +334,7 @@
       x$.position = setting.offset;
       x$.scale = setting.scale;
     });
-    z2$.keydown(function(e){
+    z$.keydown(function(e){
       var facing;
       facing = {
         '37': 'left',
@@ -336,7 +351,7 @@
         kuma.facing = facing[e.which];
       }
     });
-    z2$.keyup(function(e){
+    z$.keyup(function(e){
       switch (e.which) {
       case 37:
       case 38:

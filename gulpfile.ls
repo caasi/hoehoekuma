@@ -11,6 +11,7 @@ gulp.task \js ->
   gulp.src do
     * 'LICENSE'
       'src/ls/actor.ls'
+      'src/ls/kuma.ls'
       'src/ls/main.ls'
   .pipe gulp-concat 'main.ls'
   .pipe livescript!
